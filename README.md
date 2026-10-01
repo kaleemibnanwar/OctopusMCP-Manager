@@ -1,5 +1,7 @@
 # OctopusMCP Manager
 
+# OctopusMCP-Manager
+
 OctopusMCP is an Electron Forge desktop application backed by a private Python
 sidecar process. It installs and runs MCP servers in separate Python
 environments. Stdio is the default. Persistent HTTP is enabled per MCP only
@@ -29,6 +31,14 @@ npm start
 The desktop UI is loaded directly from packaged files. It does not bind a web
 port or run an HTTP server. Electron communicates with Python using JSON-line
 messages over the child process's stdin and stdout.
+
+`npm start` uses Chromium's explicit development-only `--no-sandbox` flag. Do
+not run it with `sudo`; Electron refuses to run as root. If OS-level Chromium
+sandboxing is required for development, place a checkout at a path without
+spaces, repair `node_modules/electron/dist/chrome-sandbox` as root with mode
+`4755`, and invoke Electron Forge directly without the development flag. The
+renderer sandbox, context isolation, preload boundary, and network restrictions
+remain enabled in the normal development command and packaged application.
 
 Build an unpacked application or native installer with Electron Forge:
 
