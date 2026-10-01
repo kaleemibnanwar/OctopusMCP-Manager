@@ -1,0 +1,71 @@
+@import url("../../src/octopusmcp/web/static/app.css");
+
+body { user-select: none; }
+button, input, textarea { font: inherit; }
+.rail { -webkit-app-region: drag; }
+.brand, nav, nav button { -webkit-app-region: no-drag; }
+.brand, nav button, .server-row, .node, .text-action {
+  border: 0;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+.brand { padding: 0; }
+nav button {
+  color: #b9cece;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 14px;
+  border-radius: 11px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 650;
+}
+nav button span { width: 20px; color: #83aaa9; font: 18px ui-monospace, monospace; }
+nav button:hover, nav button.active { color: white; background: rgba(255,255,255,.09); }
+nav button.active span { color: var(--sand); }
+.server-row { width: 100%; }
+.node { color: white; }
+.text-action { color: var(--rust); padding: 0; font-size: 12px; font-weight: 750; }
+.package-card > .button { width: 100%; }
+.loading, .failure {
+  min-height: 60vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 15px;
+  color: var(--muted);
+}
+.loading i {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--water);
+  border-top-color: var(--ocean);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+.failure strong { color: var(--ink); font: 600 24px "Iowan Old Style", Georgia, serif; }
+#toast {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  z-index: 4;
+  max-width: 420px;
+  padding: 13px 17px;
+  border-radius: 10px;
+  color: white;
+  background: var(--kelp);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: .2s ease;
+}
+#toast.show { opacity: 1; transform: none; }
+#toast.error { background: #963f28; }
+.data-root { color: #89989c; font: 10px ui-monospace, monospace; margin: 20px 2px; }
+.status.stopped-unexpected { background: var(--rust); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading i { animation: none; } #toast { transition: none; } }

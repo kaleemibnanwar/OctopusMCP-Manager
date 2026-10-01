@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "echo-lab",
+  "name": "Echo Lab",
+  "version": "0.1.0",
+  "publisher": "OctopusMCP",
+  "description": "A lightweight test MCP for checking stdio and local HTTP connections.",
+  "category": "Developer tools",
+  "source": {"type": "local", "path": "tests/fixtures/tiny_mcp"},
+  "runtime": {
+    "python": ">=3.11",
+    "module": "echo_lab.server",
+    "http_module": "echo_lab.http"
+  },
+  "transports": ["stdio", "streamable-http"],
+  "permissions": ["localhost HTTP when enabled"],
+  "hardware": "Any modern computer"
+}
+

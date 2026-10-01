@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "omnivoice",
+  "name": "OmniVoice MCP",
+  "version": "0.2.1",
+  "publisher": "k2-fsa",
+  "description": "Local multilingual zero-shot speech generation with reference voices.",
+  "category": "Speech & audio",
+  "source": {
+    "type": "git",
+    "url": "https://github.com/k2-fsa/OmniVoice.git",
+    "revision": "08be0b4ccbac3e13e374e86fbfead4b4cac343e2"
+  },
+  "runtime": {
+    "python": ">=3.11,<3.13",
+    "module": "mcp_omnivoice.server",
+    "extra_dependencies": ["mcp>=1.9,<2"]
+  },
+  "transports": ["stdio"],
+  "environment": {
+    "OMNIVOICE_MODEL_ID": "{models}/omnivoice-default",
+    "OMNIVOICE_OUTPUT_DIR": "{output}",
+    "HF_HOME": "{models}/huggingface",
+    "TORCH_HOME": "{models}/torch"
+  },
+  "assets": [
+    {
+      "id": "omnivoice-default",
+      "type": "huggingface",
+      "repository": "kawshikbuet17/OmniVoice-nf4-4bit-bnb",
+      "required": true,
+      "auto_download": true
+    }
+  ],
+  "permissions": ["network for model download", "GPU optional", "managed output directory"],
+  "hardware": "NVIDIA GPU recommended · large model download"
+}
+

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "octopus-echo-lab"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["mcp>=1.9,<2"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/echo_lab"]
+

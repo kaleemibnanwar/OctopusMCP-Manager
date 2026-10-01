@@ -1,0 +1,2 @@
+# Normalize text files to LF so Octopus Studio commits are stable across platforms.
+* text=auto eol=lf

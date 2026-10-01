@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OctopusMCP Manager</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <aside class="rail">
+    <button class="brand nav-link" data-view="overview" aria-label="Open overview">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 24c-7-11 3-20 10-20s17 9 10 20c-2 4 2 8 7 7-1 6-8 8-13 3 1 7-7 10-10 4-5 4-12 0-11-6 5 2 9-4 7-8z"/><circle cx="19" cy="18" r="2"/><circle cx="29" cy="18" r="2"/></svg>
+      <span>Octopus<em>MCP</em></span>
+    </button>
+    <nav aria-label="Main navigation">
+      <button class="nav-link active" data-view="overview"><span>⌁</span> Overview</button>
+      <button class="nav-link" data-view="catalog"><span>◫</span> Catalog</button>
+      <button class="nav-link" data-view="servers"><span>⌘</span> Installed</button>
+      <button class="nav-link" data-view="builder"><span>＋</span> Builder</button>
+    </nav>
+    <div class="rail-foot"><i></i> Python core connected<br><small>Private process IPC</small></div>
+  </aside>
+  <main id="content" tabindex="-1"><div class="loading"><i></i><span>Sounding local waters…</span></div></main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
+

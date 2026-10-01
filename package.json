@@ -1,0 +1,27 @@
+{
+  "name": "octopusmcp-manager",
+  "productName": "OctopusMCP Manager",
+  "version": "0.1.0",
+  "description": "Local control center for isolated MCP servers",
+  "main": "electron/main.js",
+  "author": "OctopusMCP",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "start": "electron-forge start",
+    "test": "node --test tests/js/*.test.js",
+    "test:python": ".venv/bin/pytest",
+    "build:python": "node scripts/build-python.mjs",
+    "package": "npm run build:python && electron-forge package",
+    "make": "npm run build:python && electron-forge make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.3",
+    "@electron-forge/maker-deb": "^7.8.3",
+    "@electron-forge/maker-rpm": "^7.8.3",
+    "@electron-forge/maker-squirrel": "^7.8.3",
+    "@electron-forge/maker-zip": "^7.8.3",
+    "electron": "^39.2.7"
+  }
+}
+
