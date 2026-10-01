@@ -51,8 +51,12 @@ def remove(
     package_id: str,
     purge_data: bool = typer.Option(False, help="Also delete models, output, and user data."),
 ) -> None:
-    Manager().remove(package_id, purge_data=purge_data)
-    typer.echo(f"Removed {package_id}." + (" Data deleted." if purge_data else " Data preserved."))
+    try:
+        Manager().remove(package_id, purge_data=purge_data)
+        typer.echo(f"Removed {package_id}." + (" Data deleted." if purge_data else " Data preserved."))
+    except ValueError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
 
 
 @http_app.command("start")

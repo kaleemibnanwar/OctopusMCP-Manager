@@ -78,6 +78,20 @@ def test_generator_creates_runnable_shape(tmp_path: Path):
     assert (target / "src" / "research_notes" / "server.py").exists()
 
 
+def test_system_mcp_is_enlisted_and_non_deletable(tmp_path: Path):
+    paths = AppPaths(tmp_path / "data").ensure()
+    manager = Manager(paths=paths)
+    installations = manager.installations()
+    assert any(item.id == "octopusmcp-manager" and item.is_system for item in installations)
+    
+    config = manager.connection_config("octopusmcp-manager")
+    assert config["type"] == "stdio"
+    assert "octopusmcp" in " ".join(config["args"]) or "mcp" in " ".join(config["args"])
+    
+    with pytest.raises(ValueError, match="cannot be deleted"):
+        manager.remove("octopusmcp-manager")
+
+
 def test_bridge_uses_one_json_response_per_request():
     class StubBridge:
         def dispatch(self, method, params=None):

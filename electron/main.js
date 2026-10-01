@@ -21,7 +21,7 @@ function backendCommand() {
 function startBackend() {
   const target = backendCommand();
   backend = spawn(target.command, target.args, {
-    cwd: path.join(__dirname, '..'),
+    cwd: app.isPackaged ? process.resourcesPath : path.join(__dirname, '..'),
     stdio: ['pipe', 'pipe', 'pipe'],
     windowsHide: true,
   });
@@ -36,6 +36,11 @@ function startBackend() {
     response.ok ? request.resolve(response.result) : request.reject(new Error(response.error?.message || 'Backend request failed'));
   });
   backend.stderr.on('data', (chunk) => console.error(`[python] ${chunk.toString().trimEnd()}`));
+  backend.on('error', (error) => {
+    for (const request of pending.values()) request.reject(error);
+    pending.clear();
+    console.error('Could not start Python backend:', error);
+  });
   backend.on('exit', (code) => {
     for (const request of pending.values()) request.reject(new Error(`Python backend stopped (${code})`));
     pending.clear();
@@ -60,6 +65,9 @@ function createWindow() {
     minHeight: 640,
     backgroundColor: '#f6f8f5',
     title: 'OctopusMCP Manager',
+    frame: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: false,
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -80,6 +88,13 @@ function createWindow() {
 app.whenReady().then(() => {
   startBackend();
   ipcMain.handle('backend:request', (_event, method, params) => requestBackend(method, params));
+  ipcMain.handle('window:minimize', (event) => BrowserWindow.fromWebContents(event.sender)?.minimize());
+  ipcMain.handle('window:toggle-maximize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window?.isMaximized()) window.unmaximize(); else window?.maximize();
+    return window?.isMaximized() ?? false;
+  });
+  ipcMain.handle('window:close', (event) => BrowserWindow.fromWebContents(event.sender)?.close());
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
@@ -88,4 +103,3 @@ app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(
 app.on('before-quit', () => { if (backend) backend.kill(); });
 
 module.exports = { backendCommand };
-

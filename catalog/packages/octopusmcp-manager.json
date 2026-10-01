@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "octopusmcp-manager",
+  "name": "OctopusMCP Manager Core",
+  "version": "1.0.0",
+  "publisher": "Octopus Studio",
+  "description": "Built-in core management MCP server providing native tools for AI agents (Claude Desktop, Cursor, Cline, etc.) to inspect catalog packages, supervise running servers, manage isolated environments, and scaffold new MCP projects.",
+  "category": "Core & System",
+  "source": {
+    "type": "local",
+    "path": "src/octopusmcp"
+  },
+  "runtime": {
+    "python": ">=3.11",
+    "module": "octopusmcp.mcp_server"
+  },
+  "transports": ["stdio"],
+  "permissions": [
+    "Local MCP lifecycle management",
+    "Process supervision & metrics",
+    "Managed filesystem isolation"
+  ],
+  "hardware": "Integrated with OctopusMCP Desktop runtime"
+}

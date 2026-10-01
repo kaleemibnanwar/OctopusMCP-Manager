@@ -55,6 +55,7 @@ class CatalogPackage(BaseModel):
     assets: list[AssetSpec] = Field(default_factory=list)
     permissions: list[str] = Field(default_factory=list)
     hardware: str = "Any modern computer"
+    is_system: bool = False
 
     @field_validator("id")
     @classmethod
@@ -78,6 +79,7 @@ class Installation(BaseModel):
     created_at: str
     updated_at: str
     environment: dict[str, str] = Field(default_factory=dict)
+    is_system: bool = False
 
     @classmethod
     def new(cls, package: CatalogPackage) -> "Installation":

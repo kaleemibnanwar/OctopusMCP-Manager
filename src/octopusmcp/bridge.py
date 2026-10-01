@@ -25,6 +25,7 @@ class Bridge:
             "servers.list": lambda: self._servers(manager),
             "servers.get": lambda package_id: self._server(manager, package_id),
             "servers.install": lambda package_id: manager.install(package_id).model_dump(),
+            "servers.install.cancel": lambda package_id: manager.cancel_install(package_id),
             "servers.connection": lambda package_id: manager.connection_config(package_id),
             "servers.http.start": lambda package_id, port=None: manager.start_http(
                 package_id, port
@@ -62,7 +63,7 @@ class Bridge:
     @staticmethod
     def _server(manager: Manager, package_id: str) -> dict[str, Any]:
         package = manager.catalog.get(package_id)
-        installation = manager.database.get(package_id)
+        installation = manager.get_installation(package_id)
         return {
             "package": package.model_dump(),
             "installation": installation.model_dump() if installation else None,
