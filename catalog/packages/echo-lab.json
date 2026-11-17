@@ -3,7 +3,7 @@
   "id": "echo-lab",
   "name": "Echo Lab",
   "version": "0.1.0",
-  "publisher": "OctopusMCP",
+  "publisher": "Soloman Studio",
   "description": "A lightweight test MCP for checking stdio and local HTTP connections.",
   "category": "Developer tools",
   "source": {"type": "local", "path": "catalog/sources/echo_lab"},

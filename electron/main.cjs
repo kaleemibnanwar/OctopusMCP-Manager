@@ -63,21 +63,22 @@ function createWindow() {
     height: 820,
     minWidth: 900,
     minHeight: 640,
-    backgroundColor: '#f6f8f5',
-    title: 'OctopusMCP Manager',
+    backgroundColor: '#090a0b',
+    title: 'Soloman Manager',
+    icon: path.join(__dirname, '..', 'public', 'assets', 'logo.png'),
     frame: false,
     titleBarStyle: 'hidden',
     titleBarOverlay: false,
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
     },
   });
   window.removeMenu();
-  window.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  window.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   window.once('ready-to-show', () => window.show());
   window.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) shell.openExternal(url);

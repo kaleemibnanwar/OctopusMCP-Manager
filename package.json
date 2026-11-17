@@ -1,19 +1,36 @@
 {
-  "name": "octopusmcp-manager",
-  "productName": "OctopusMCP Manager",
+  "name": "soloman-manager",
+  "productName": "Soloman Manager",
   "version": "0.1.0",
   "description": "Local control center for isolated MCP servers",
-  "main": "electron/main.js",
-  "author": "OctopusMCP",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "config": {
+    "forge": "./forge.config.cjs"
+  },
+  "author": "Soloman",
   "license": "Apache-2.0",
   "private": true,
+  "icon": "public/assets/logo.png",
   "scripts": {
-    "start": "electron-forge start -- --no-sandbox",
-    "test": "node --test tests/js/*.test.js",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "npm run build && electron-forge start -- --no-sandbox",
+    "test": "node --test tests/js/*.test.cjs",
     "test:python": ".venv/bin/pytest",
     "build:python": "node scripts/build-python.mjs",
-    "package": "npm run build:python && electron-forge package",
-    "make": "npm run build:python && electron-forge make"
+    "package": "npm run build && npm run build:python && electron-forge package",
+    "make": "npm run build && npm run build:python && electron-forge make"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.462.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^6.30.4",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",
@@ -21,6 +38,15 @@
     "@electron-forge/maker-rpm": "^7.8.3",
     "@electron-forge/maker-squirrel": "^7.8.3",
     "@electron-forge/maker-zip": "^7.8.3",
-    "electron": "^39.2.7"
+    "@types/node": "^22.5.5",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.1.0",
+    "autoprefixer": "^10.4.20",
+    "electron": "^39.2.7",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.11",
+    "typescript": "^5.5.3",
+    "vite": "^8.0.0"
   }
 }

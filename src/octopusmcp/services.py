@@ -126,7 +126,7 @@ class Manager:
         return Installation(
             id=SYSTEM_PACKAGE_ID,
             package_id=SYSTEM_PACKAGE_ID,
-            name="OctopusMCP Manager Core",
+            name="Soloman Manager Core",
             version="1.0.0",
             active_release="1.0.0",
             state=InstallState.READY,
@@ -373,7 +373,7 @@ class Manager:
 
     def start_http(self, package_id: str, port: int | None = None) -> Installation:
         if package_id == SYSTEM_PACKAGE_ID:
-            raise ValueError("OctopusMCP Manager Core is a built-in stdio service and does not run standalone HTTP.")
+            raise ValueError("Soloman Manager Core is a built-in stdio service and does not run standalone HTTP.")
         installation = self._ready(package_id)
         package = self.catalog.get(package_id)
         if "streamable-http" not in package.transports:
@@ -421,7 +421,7 @@ class Manager:
 
     def remove(self, package_id: str, purge_data: bool = False) -> None:
         if package_id == SYSTEM_PACKAGE_ID:
-            raise ValueError("The OctopusMCP Manager Core MCP is a built-in system service and cannot be deleted.")
+            raise ValueError("The Soloman Manager Core MCP is a built-in system service and cannot be deleted.")
         installation = self.database.get(package_id)
         if not installation:
             raise KeyError(f"Not installed: {package_id}")

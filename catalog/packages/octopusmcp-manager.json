@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "id": "octopusmcp-manager",
-  "name": "OctopusMCP Manager Core",
+  "name": "Soloman Manager Core",
   "version": "1.0.0",
-  "publisher": "Octopus Studio",
+  "publisher": "Soloman Studio",
   "description": "Built-in core management MCP server providing native tools for AI agents (Claude Desktop, Cursor, Cline, etc.) to inspect catalog packages, supervise running servers, manage isolated environments, and scaffold new MCP projects.",
   "category": "Core & System",
   "source": {
@@ -20,5 +20,5 @@
     "Process supervision & metrics",
     "Managed filesystem isolation"
   ],
-  "hardware": "Integrated with OctopusMCP Desktop runtime"
+  "hardware": "Integrated with Soloman Manager desktop runtime"
 }

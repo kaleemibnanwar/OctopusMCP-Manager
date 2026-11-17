@@ -12,3 +12,4 @@ out/
 dist-python/
 build/
 .octopusStudio/
+.soloman/
