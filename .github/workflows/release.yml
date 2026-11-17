@@ -1,0 +1,75 @@
+name: Build & Publish Multi-Platform Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Linux packaging tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot
+
+      - name: Set up Python virtual environment
+        shell: bash
+        run: |
+          python -m venv .venv
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=.venv/Scripts/python; else PY=.venv/bin/python; fi
+          "$PY" -m pip install --upgrade pip
+          "$PY" -m pip install -e ".[dev]"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build installers
+        run: npm run make
+
+      - name: Collect release artifacts
+        shell: bash
+        run: |
+          mkdir -p dist-release
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp out/make/squirrel.windows/x64/*Setup.exe "dist-release/Soloman-Manager-Setup-$VERSION.exe"
+            cp out/make/zip/win32/x64/*.zip dist-release/Soloman-Manager-Windows-Portable.zip
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            cp out/make/zip/darwin/*/*.zip dist-release/Soloman-Manager-macOS-AppleSilicon.zip
+          else
+            cp out/make/deb/x64/*.deb dist-release/
+            cp out/make/zip/linux/x64/*.zip dist-release/Soloman-Manager-Linux-Portable.zip
+          fi
+
+      - name: Publish to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          case "$TAG" in v*) ;; *) TAG="v$(node -p "require('./package.json').version")";; esac
+          gh release create "$TAG" --title "Soloman Manager $TAG" --notes "Soloman Manager $TAG - Windows, macOS and Linux builds." || true
+          gh release upload "$TAG" dist-release/* --clobber

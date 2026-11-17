@@ -24,7 +24,7 @@ module.exports = {
           name: 'soloman_manager',
           setupIcon: path.join(__dirname, 'public', 'assets', 'logo.ico'),
         },
-      }]
+      }, { name: '@electron-forge/maker-zip', config: {} }]
     : process.platform === 'darwin'
       ? [{ name: '@electron-forge/maker-zip', config: {} }]
       : [{
@@ -39,5 +39,5 @@ module.exports = {
               categories: ['Development', 'Utility'],
             },
           },
-        }],
+        }, { name: '@electron-forge/maker-zip', config: {} }],
 };
