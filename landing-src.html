@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f7f5">
+  <title>Soloman Manager — The control center for your MCP stack</title>
+  <meta name="description" content="Soloman Manager is a local-first desktop control center for MCP servers. Isolated installs, one local AI endpoint, one-click CLI sync — and a Manager MCP that lets your agent build servers itself.">
+  <link rel="icon" type="image/png" href="{{LOGO}}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============ tokens ============ */
+    :root{
+      --bg:#f7f7f5; --paper:#ffffff; --ink:#141414; --muted:#6f6f6c; --faint:#a3a3a0;
+      --line:#e5e5e1; --soft:#efefec; --head:rgba(247,247,245,.9);
+      --inkbtn-bg:#161616; --inkbtn-fg:#ffffff;
+      --console-bg:#101216; --console-line:#232833; --console-ink:#d7dee9; --console-dim:#7d8798;
+      --ok:#22c55e; --warn:#eab308;
+      color-scheme:light;
+    }
+    :root[data-theme="dark"]{
+      --bg:#0a0c10; --paper:#11141a; --ink:#f2f5f9; --muted:#98a2b3; --faint:#5b6675;
+      --line:#242c38; --soft:#161b24; --head:rgba(10,12,16,.9);
+      --inkbtn-bg:#f2f5f9; --inkbtn-fg:#11141a;
+      --console-bg:#0d1015; --console-line:#242c38;
+      color-scheme:dark;
+    }
+    @media (prefers-color-scheme: dark){
+      :root:not([data-theme="light"]){
+        --bg:#0a0c10; --paper:#11141a; --ink:#f2f5f9; --muted:#98a2b3; --faint:#5b6675;
+        --line:#242c38; --soft:#161b24; --head:rgba(10,12,16,.9);
+        --inkbtn-bg:#f2f5f9; --inkbtn-fg:#11141a;
+        --console-bg:#0d1015; --console-line:#242c38;
+        color-scheme:dark;
+      }
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}
+    button{font:inherit;cursor:pointer;color:inherit}
+    img{max-width:100%;display:block}
+    ::selection{background:var(--ink);color:var(--bg)}
+    .wrap{width:min(1160px,calc(100% - 56px));margin:auto}
+    .mono{font-family:"IBM Plex Mono",monospace}
+    .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+    .muted{color:var(--muted)}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;flex:none}
+    .dot.off{background:var(--faint)}
+    .skip{position:absolute;left:-999px}
+    .skip:focus{left:16px;top:16px;z-index:60;background:var(--inkbtn-bg);color:var(--inkbtn-fg);padding:10px 14px;border-radius:8px}
+
+    /* ============ buttons ============ */
+    .btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:600;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:9px;transition:transform .18s,border-color .18s,background .18s;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);border-color:var(--faint)}
+    .btn.solid{background:var(--inkbtn-bg);border-color:var(--inkbtn-bg);color:var(--inkbtn-fg)}
+    .btn.ghost{background:transparent}
+    .btn.small{padding:9px 15px;font-size:11.5px}
+
+    /* ============ nav ============ */
+    .top{position:sticky;top:0;z-index:40;background:var(--head);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+    .nav{height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:-.05em}
+    .brand img{width:28px;height:28px;border-radius:7px}
+    .brand em{font-style:normal;color:var(--faint)}
+    .navlinks{display:flex;gap:26px;font-size:12px;color:var(--muted)}
+    .navlinks a:hover{color:var(--ink)}
+    .navact{display:flex;gap:9px;align-items:center}
+    .iconbtn{width:38px;height:38px;border-radius:999px;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;font-size:14px;transition:border-color .18s}
+    .iconbtn:hover{border-color:var(--faint)}
+    .menubtn{display:none}
+    .mnav{display:none}
+
+    /* ============ hero ============ */
+    .hero{padding:92px 0 56px;display:grid;grid-template-columns:1.35fr .85fr;gap:56px;align-items:center}
+    .pill{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 14px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--muted)}
+    .hero h1{font-size:clamp(46px,5.6vw,78px);line-height:1.0;letter-spacing:-.07em;font-weight:600;margin:24px 0 22px}
+    .hero h1 span{color:var(--faint)}
+    .hero .lede{font-size:16px;line-height:1.75;color:var(--muted);max-width:520px;margin:0 0 30px}
+    .herocta{display:flex;gap:10px;flex-wrap:wrap}
+    .herometa{display:flex;gap:20px;flex-wrap:wrap;margin-top:28px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;color:var(--faint)}
+
+    /* status console — original component */
+    .console{background:var(--console-bg);border:1px solid var(--console-line);border-radius:14px;color:var(--console-ink);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+    .console-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--console-line);font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--console-dim)}
+    .console-head .live{display:flex;align-items:center;gap:7px;color:var(--ok)}
+    .console-body{padding:8px 0}
+    .cline{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 18px;font-size:12px}
+    .cline + .cline{border-top:1px dashed var(--console-line)}
+    .cline .k{display:flex;align-items:center;gap:10px;color:var(--console-ink)}
+    .cline .v{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--console-dim);text-align:right}
+    .cline .v b{color:var(--console-ink);font-weight:500}
+    .console-foot{padding:12px 18px;border-top:1px solid var(--console-line);font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--console-dim);display:flex;justify-content:space-between}
+
+    /* ============ app frame — original component ============ */
+    .stage{padding:8px 0 0}
+    .frame{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.14)}
+    .chrome{height:46px;display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line)}
+    .traffic{display:flex;gap:7px}
+    .traffic i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+    .chrome .title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+    .chrome .title img{width:17px;height:17px;border-radius:4px}
+    .chrome .addr{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);border:1px solid var(--line);background:var(--soft);border-radius:6px;padding:5px 10px}
+    .frame img.shot{width:100%;height:auto}
+    .framecap{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+    .framecap div{padding:15px 20px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:10px}
+    .framecap div + div{border-left:1px solid var(--line)}
+    .framecap b{color:var(--ink);font-weight:600}
+
+    /* ============ ticker — original component ============ */
+    .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:72px;overflow:hidden;background:var(--paper)}
+    .ticker-track{display:flex;gap:0;width:max-content;animation:tick 42s linear infinite}
+    .ticker span{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;color:var(--muted);padding:15px 0;white-space:nowrap}
+    .ticker span::after{content:"·";margin:0 26px;color:var(--faint)}
+    @keyframes tick{to{transform:translateX(-50%)}}
+
+    /* ============ sections ============ */
+    .section{padding:104px 0 0}
+    .shead{display:flex;justify-content:space-between;align-items:flex-end;gap:44px;margin-bottom:44px}
+    .shead h2{font-size:clamp(32px,4vw,54px);line-height:1.05;letter-spacing:-.06em;font-weight:600;margin:14px 0 0}
+    .shead p{max-width:360px;line-height:1.8;color:var(--muted);margin:0}
+
+    /* ============ bento — original component ============ */
+    .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .cell{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
+    .cell:hover{border-color:var(--faint);transform:translateY(-2px)}
+    .cell .pad{padding:24px 26px 20px}
+    .cell h3{font-size:19px;letter-spacing:-.04em;margin:10px 0 8px}
+    .cell p{font-size:12.5px;line-height:1.7;color:var(--muted);margin:0}
+    .cell .visual{margin-top:auto}
+    .cell .visual img{width:100%;height:auto;border-top:1px solid var(--line)}
+    .span7{grid-column:span 7}.span5{grid-column:span 5}.span4{grid-column:span 4}
+    /* mini visuals */
+    .tree{margin:18px 26px 24px;background:var(--console-bg);border:1px solid var(--console-line);border-radius:10px;padding:16px 18px;font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.9;color:var(--console-dim);overflow-x:auto;white-space:pre}
+    .tree b{color:var(--console-ink);font-weight:500}
+    .tree i{color:var(--ok);font-style:normal}
+    .lifelines{margin:14px 26px 24px;display:grid;gap:8px}
+    .lifeline{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:11.5px}
+    .lifeline .nm{font-weight:600}
+    .lifeline .st{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted)}
+    .lifeline .act{display:flex;gap:5px}
+    .lifeline .act i{font-style:normal;font-size:9px;border:1px solid var(--line);border-radius:5px;padding:3px 7px;color:var(--muted)}
+    .provlist{margin:14px 26px 24px;display:grid}
+    .prov{display:flex;align-items:center;gap:10px;padding:9px 2px;font-size:12px}
+    .prov + .prov{border-top:1px dashed var(--line)}
+    .prov .md{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--faint)}
+
+    /* ============ manager mcp band — original ============ */
+    .band{margin-top:104px;background:var(--console-bg);color:var(--console-ink);border-top:1px solid var(--console-line);border-bottom:1px solid var(--console-line)}
+    .band .wrap{padding:96px 0}
+    .band .eyebrow{color:var(--console-dim)}
+    .bandgrid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:start}
+    .band h2{font-size:clamp(32px,4vw,54px);line-height:1.05;letter-spacing:-.06em;font-weight:600;margin:14px 0 18px;color:#f2f5f9}
+    .band .lede{color:var(--console-dim);line-height:1.8;max-width:480px;margin:0 0 34px}
+    /* tool ledger */
+    .ledger{border-top:1px solid var(--console-line)}
+    .tool{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:16px 4px;border-bottom:1px solid var(--console-line);transition:background .15s}
+    .tool:hover{background:rgba(255,255,255,.03)}
+    .tool .n{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--console-dim);padding-top:3px}
+    .tool .t{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#9ece8a;margin-bottom:5px}
+    .tool p{margin:0;font-size:11.5px;line-height:1.65;color:var(--console-dim)}
+    /* code window with tabs */
+    .codewin{background:#0d1015;border:1px solid var(--console-line);border-radius:14px;overflow:hidden;position:sticky;top:96px}
+    .codewin-head{display:flex;align-items:center;gap:4px;padding:10px 12px;border-bottom:1px solid var(--console-line)}
+    .ctab{border:0;background:transparent;color:var(--console-dim);font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:7px 13px;border-radius:7px}
+    .ctab[aria-selected="true"]{background:var(--console-line);color:var(--console-ink)}
+    .copybtn{margin-left:auto;border:1px solid var(--console-line);background:transparent;color:var(--console-dim);font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;padding:6px 11px;border-radius:7px}
+    .copybtn:hover{color:var(--console-ink)}
+    .codewin pre{margin:0;padding:20px 22px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;line-height:1.85;color:var(--console-ink);overflow-x:auto}
+    .codewin pre .c{color:#5f6b7e}.codewin pre .s{color:#9ece8a}.codewin pre .k{color:#8ab4ff}
+    .codewin-note{padding:13px 22px;border-top:1px solid var(--console-line);font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;color:var(--console-dim)}
+    .codepane[hidden]{display:none}
+
+    /* ============ explorer — original component ============ */
+    .explorer{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+    .rail{display:flex;flex-direction:column;gap:6px;position:sticky;top:96px}
+    .rtab{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid transparent;background:transparent;border-radius:10px;padding:12px 15px;font-size:12.5px;font-weight:500;color:var(--muted);transition:.15s}
+    .rtab .n{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--faint)}
+    .rtab:hover{color:var(--ink);background:var(--soft)}
+    .rtab[aria-selected="true"]{background:var(--paper);border-color:var(--line);color:var(--ink);font-weight:600}
+    .rtab[aria-selected="true"] .n{color:var(--ink)}
+    .xframe{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .xframe .chrome{height:42px}
+    .xpane[hidden]{display:none}
+    .xpane img{width:100%;height:auto}
+    .xcap{padding:14px 20px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);line-height:1.6}
+    .xcap b{color:var(--ink)}
+
+    /* ============ architecture ============ */
+    .flow{display:grid;grid-template-columns:1fr 64px 1fr 64px 1fr;align-items:stretch;gap:0;margin-top:8px}
+    .fnode{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
+    .fnode h3{font-size:17px;letter-spacing:-.03em;margin:16px 0 8px}
+    .fnode p{font-size:11.5px;line-height:1.7;color:var(--muted);margin:0 0 16px}
+    .fnode .tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;color:var(--muted);border:1px solid var(--line);background:var(--soft);border-radius:6px;padding:5px 9px;display:inline-block}
+    .fjoin{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+    .fjoin .ln{width:100%;height:1px;background:var(--line);position:relative}
+    .fjoin .ln::after{content:"";position:absolute;right:-1px;top:-3px;border:3.5px solid transparent;border-left-color:var(--faint)}
+    .fjoin small{font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.1em;color:var(--faint);white-space:nowrap}
+    .truths{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:14px;background:var(--paper);margin-top:14px;overflow:hidden}
+    .truth{padding:22px 24px}
+    .truth + .truth{border-left:1px solid var(--line)}
+    .truth b{display:block;font-size:24px;letter-spacing:-.05em;font-weight:600;margin-bottom:5px}
+    .truth small{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.12em;color:var(--muted)}
+
+    /* ============ download ============ */
+    .dlgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .os{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:30px;display:flex;flex-direction:column;gap:0;transition:border-color .2s}
+    .os:hover{border-color:var(--faint)}
+    .os h3{font-size:22px;letter-spacing:-.04em;margin:14px 0 6px}
+    .os p{font-size:12px;line-height:1.7;color:var(--muted);margin:0 0 22px}
+    .os .specs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+    .os .specs span{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.06em;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--muted)}
+    .os .btn{align-self:flex-start}
+    .os .fine{margin-top:16px;font-size:10.5px;color:var(--faint);line-height:1.6}
+    .srcnote{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .srcnote .lbl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+    .srcnote code{font-family:"IBM Plex Mono",monospace;font-size:11.5px;background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:8px 13px}
+    .srcnote a{margin-left:auto;font-size:11.5px;font-weight:600}
+    .srcnote a:hover{color:var(--muted)}
+
+    /* ============ footer ============ */
+    .footer{border-top:1px solid var(--line);margin-top:104px;padding:36px 0 48px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:11px;flex-wrap:wrap}
+    .flinks{display:flex;gap:22px;flex-wrap:wrap}
+    .flinks a:hover{color:var(--ink)}
+
+    /* ============ reveal ============ */
+    .rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+    .rv.in{opacity:1;transform:none}
+
+    /* ============ responsive ============ */
+    @media(max-width:980px){
+      .navlinks{display:none}
+      .menubtn{display:grid}
+      .mnav.open{display:flex;position:absolute;left:0;right:0;top:68px;background:var(--bg);border-bottom:1px solid var(--line);padding:20px 28px;flex-direction:column;gap:18px;font-size:13px}
+      .hero{grid-template-columns:1fr;gap:36px;padding:64px 0 44px}
+      .console{max-width:520px}
+      .span7,.span5,.span4{grid-column:span 12}
+      .bandgrid{grid-template-columns:1fr;gap:44px}
+      .codewin{position:static}
+      .explorer{grid-template-columns:1fr}
+      .rail{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}
+      .rtab{flex:none}
+      .rtab .n{display:none}
+      .flow{grid-template-columns:1fr}
+      .fjoin{padding:10px 0}
+      .fjoin .ln{width:1px;height:26px}
+      .fjoin .ln::after{right:-3px;top:auto;bottom:-1px;border-left-color:transparent;border-top-color:var(--faint)}
+      .truths{grid-template-columns:repeat(2,1fr)}
+      .truth:nth-child(3){border-left:0}
+      .truth:nth-child(n+3){border-top:1px solid var(--line)}
+      .dlgrid{grid-template-columns:1fr}
+      .shead{display:block}
+      .shead p{margin-top:16px}
+    }
+    @media(max-width:600px){
+      .wrap{width:calc(100% - 36px)}
+      .nav{height:62px}
+      .mnav.open{top:62px}
+      .navact .btn{display:none}
+      .hero h1{font-size:44px}
+      .hero .lede{font-size:14px}
+      .chrome .addr{display:none}
+      .framecap{grid-template-columns:1fr}
+      .framecap div + div{border-left:0;border-top:1px solid var(--line)}
+      .section{padding:72px 0 0}
+      .band{margin-top:72px}
+      .band .wrap{padding:64px 0}
+      .truths{grid-template-columns:1fr}
+      .truth + .truth{border-left:0;border-top:1px solid var(--line)}
+      .footer{display:block}
+      .flinks{margin-top:18px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+      .rv{opacity:1;transform:none}
+      .ticker-track{animation:none}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="wrap nav">
+      <a class="brand" href="#main" aria-label="Soloman Manager home"><img src="{{LOGO}}" alt="">soloman&nbsp;manager<em>.</em></a>
+      <nav class="navlinks" aria-label="Primary">
+        <a href="#features">Control center</a>
+        <a href="#agent">Manager MCP</a>
+        <a href="#explore">Every page</a>
+        <a href="#local">Local-first</a>
+        <a href="https://github.com/kaleemibnanwar/OctopusMCP-Manager" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+      <div class="navact">
+        <a class="btn solid small" href="#download">Download</a>
+        <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme"><span data-theme-label>◐</span></button>
+        <button class="iconbtn menubtn" type="button" data-menu aria-label="Toggle navigation" aria-expanded="false">☰</button>
+      </div>
+    </div>
+    <nav class="mnav" data-mnav aria-label="Mobile">
+      <a href="#features">Control center</a><a href="#agent">Manager MCP</a><a href="#explore">Every page</a><a href="#local">Local-first</a><a href="#download">Download</a>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- ============ hero ============ -->
+    <section class="wrap hero">
+      <div>
+        <span class="pill"><span class="dot"></span>LOCAL-FIRST · WINDOWS &amp; LINUX · APACHE-2.0</span>
+        <h1>Every MCP server.<br><span>One control center.</span></h1>
+        <p class="lede">Soloman Manager installs, supervises and connects your MCP servers — each in its own isolated environment. One local AI endpoint for every provider, one-click sync for every coding CLI, and a Manager MCP your agent can use to build new servers itself.</p>
+        <div class="herocta">
+          <a class="btn solid" href="https://github.com/kaleemibnanwar/OctopusMCP-Manager/releases/download/windows-latest/Soloman.Manager-0.1.0.Setup.exe">Download for Windows ↓</a>
+          <a class="btn ghost" href="https://github.com/kaleemibnanwar/OctopusMCP-Manager/releases/download/windows-latest/soloman-manager_0.1.0_amd64.deb">Linux .deb ↓</a>
+        </div>
+        <div class="herometa"><span>NO ACCOUNT</span><span>NO TELEMETRY</span><span>WORKS OFFLINE</span></div>
+      </div>
+      <aside class="console rv" aria-label="Example manager status">
+        <div class="console-head"><span>soloman://status</span><span class="live"><span class="dot"></span>LIVE</span></div>
+        <div class="console-body">
+          <div class="cline"><span class="k"><span class="dot"></span>Local proxy</span><span class="v"><b>127.0.0.1:8787</b> · openai-compatible</span></div>
+          <div class="cline"><span class="k"><span class="dot"></span>MCP servers</span><span class="v"><b>5 running</b> · 0 conflicts</span></div>
+          <div class="cline"><span class="k"><span class="dot"></span>Manager MCP</span><span class="v"><b>5 tools</b> · stdio + http</span></div>
+          <div class="cline"><span class="k"><span class="dot"></span>CLI sync</span><span class="v"><b>claude-code</b> · codex · +3</span></div>
+          <div class="cline"><span class="k"><span class="dot off"></span>Telemetry</span><span class="v">disabled — by design</span></div>
+        </div>
+        <div class="console-foot"><span>ALL SYSTEMS LOCAL</span><span>SQLITE · OWN DATA DIR</span></div>
+      </aside>
+    </section>
+
+    <!-- ============ showcase ============ -->
+    <section class="wrap stage rv" aria-label="Soloman Manager overview screenshot">
+      <div class="frame">
+        <div class="chrome">
+          <span class="traffic"><i></i><i></i><i></i></span>
+          <span class="title"><img src="{{LOGO}}" alt="">Soloman Manager — Overview</span>
+          <span class="addr">soloman-manager · desktop</span>
+        </div>
+        <img class="shot" src="{{SHOT_OVERVIEW}}" alt="Soloman Manager overview page: running servers, proxy status, request activity and CLI sync state" width="1600" height="1000">
+        <div class="framecap">
+          <div><span class="dot"></span><span><b>Live supervision</b> — state, uptime &amp; memory per server</span></div>
+          <div><span class="dot"></span><span><b>One endpoint</b> — every provider behind :8787</span></div>
+          <div><span class="dot"></span><span><b>Agent-ready</b> — Manager MCP exposed over stdio</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ticker ============ -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>OWN VENV PER SERVER</span><span>STDIO + HTTP TRANSPORTS</span><span>PYDANTIC-VALIDATED CONTRACTS</span><span>PORT-CONFLICT CHECKS</span><span>SQLITE REGISTRY</span><span>PER-SERVER LOGS</span><span>ONE-FILE PYTHON BACKEND</span><span>SANDBOXED RENDERER</span><span>PROVIDER FALLBACK</span><span>NATIVE CLI CONFIGS</span>
+        <span>OWN VENV PER SERVER</span><span>STDIO + HTTP TRANSPORTS</span><span>PYDANTIC-VALIDATED CONTRACTS</span><span>PORT-CONFLICT CHECKS</span><span>SQLITE REGISTRY</span><span>PER-SERVER LOGS</span><span>ONE-FILE PYTHON BACKEND</span><span>SANDBOXED RENDERER</span><span>PROVIDER FALLBACK</span><span>NATIVE CLI CONFIGS</span>
+      </div>
+    </div>
+
+    <!-- ============ bento features ============ -->
+    <section class="section wrap" id="features">
+      <div class="shead rv">
+        <div><div class="eyebrow">01 / CONTROL CENTER</div><h2>Install once.<br>Never fight dependencies again.</h2></div>
+        <p>Every server is isolated by construction, supervised by a real process manager, and reachable through one protocol. The boring parts are handled — the interesting parts are yours.</p>
+      </div>
+      <div class="bento">
+        <article class="cell span7 rv">
+          <div class="pad">
+            <div class="eyebrow">LOCAL PROXY</div>
+            <h3>Every provider. One localhost endpoint.</h3>
+            <p>OpenAI, Anthropic, DeepSeek, Qwen and Kimi behind a single OpenAI-compatible endpoint on :8787 — with a local API key, provider fallback and a live request log. Point any tool at it and stop juggling five SDKs.</p>
+          </div>
+          <div class="visual"><img src="{{SHOT_PROXY}}" alt="Local Proxy page: endpoint, local key, fallback routing and request log" loading="lazy" width="1600" height="1000"></div>
+        </article>
+        <article class="cell span5 rv">
+          <div class="pad">
+            <div class="eyebrow">CLI SYNC</div>
+            <h3>Every coding CLI, in one click.</h3>
+            <p>Detects Claude Code, Codex CLI, Gemini CLI, OpenCode and Droid — then writes each one's native config, with a preview before every write.</p>
+          </div>
+          <div class="visual"><img src="{{SHOT_SYNC}}" alt="CLI Sync page: detected coding CLIs with native config paths and sync controls" loading="lazy" width="1600" height="1000"></div>
+        </article>
+        <article class="cell span4 rv">
+          <div class="pad">
+            <div class="eyebrow">ISOLATION</div>
+            <h3>A world per server.</h3>
+            <p>Each install gets its own virtual environment, config, models, data and logs. Dependency conflicts are structurally impossible.</p>
+          </div>
+          <div class="visual tree">servers/<b>&lt;server-id&gt;</b>/
+├── <b>venv/</b>        <i># own environment</i>
+├── config/      <i># own settings</i>
+├── models/      <i># own weights</i>
+├── data/        <i># own storage</i>
+├── output/      <i># own artifacts</i>
+└── logs/        <i># own trail</i></div>
+        </article>
+        <article class="cell span4 rv">
+          <div class="pad">
+            <div class="eyebrow">LIFECYCLE</div>
+            <h3>Real supervision.</h3>
+            <p>Start, stop and restart with PID and memory tracking, live logs, and port-conflict checks before any HTTP server binds.</p>
+          </div>
+          <div class="visual lifelines">
+            <div class="lifeline"><span class="dot"></span><span class="nm">github-ops</span><span class="st">PID 4182 · 84 MB</span><span class="act"><i>stop</i><i>logs</i></span></div>
+            <div class="lifeline"><span class="dot"></span><span class="nm">smtp-mail</span><span class="st">PID 4211 · 61 MB</span><span class="act"><i>stop</i><i>logs</i></span></div>
+            <div class="lifeline"><span class="dot off"></span><span class="nm">web-scraper</span><span class="st">stopped</span><span class="act"><i>start</i><i>logs</i></span></div>
+          </div>
+        </article>
+        <article class="cell span4 rv">
+          <div class="pad">
+            <div class="eyebrow">PROVIDERS</div>
+            <h3>Keys stay home.</h3>
+            <p>Connect providers once. Credentials live in your OS-native data directory — never in a cloud, never in a repo.</p>
+          </div>
+          <div class="visual provlist">
+            <div class="prov"><span class="dot"></span>OpenAI<span class="md">gpt-4o · o1</span></div>
+            <div class="prov"><span class="dot"></span>Anthropic<span class="md">claude-4</span></div>
+            <div class="prov"><span class="dot"></span>DeepSeek<span class="md">reasoner</span></div>
+            <div class="prov"><span class="dot off"></span>Qwen<span class="md">qwen-max</span></div>
+            <div class="prov"><span class="dot off"></span>Kimi<span class="md">moonshot-v1</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ manager mcp ============ -->
+    <section class="band" id="agent">
+      <div class="wrap">
+        <div class="bandgrid">
+          <div class="rv">
+            <div class="eyebrow">02 / MANAGER MCP</div>
+            <h2>The manager is<br>an MCP server.</h2>
+            <p class="lede">Not a chat widget bolted on the side — the manager itself speaks the Model Context Protocol. Any MCP host can read your stack, scaffold new servers, patch existing ones and retire them safely, live, while you watch. Every contract is Pydantic-validated before it touches disk.</p>
+            <div class="ledger">
+              <div class="tool"><span class="n">01</span><div><div class="t">mcp_creation_guide</div><p>Hands the agent the full blueprint — folder layout, manifest schema, transport rules and conventions — before it writes a single file.</p></div></div>
+              <div class="tool"><span class="n">02</span><div><div class="t">mcp_creator</div><p>Scaffolds a working server with tools and schemas into its own isolated environment, ready to start.</p></div></div>
+              <div class="tool"><span class="n">03</span><div><div class="t">mcp_modifier</div><p>Patches tools, schemas and configuration of an existing server — validated, versioned, reversible.</p></div></div>
+              <div class="tool"><span class="n">04</span><div><div class="t">mcp_destroyer</div><p>Retires a server cleanly: process stopped, environment removed, registry updated. No orphans.</p></div></div>
+              <div class="tool"><span class="n">05</span><div><div class="t">extended_mcp_servers</div><p>Discovery — lets an agent list servers it doesn't have yet, read their tool surface, and connect instead of reinventing.</p></div></div>
+            </div>
+          </div>
+          <div class="rv">
+            <div class="codewin">
+              <div class="codewin-head" role="tablist" aria-label="Connection transport">
+                <button class="ctab" role="tab" aria-selected="true" data-cpane="stdio">stdio</button>
+                <button class="ctab" role="tab" aria-selected="false" data-cpane="http">http</button>
+                <button class="copybtn" type="button" data-copy>COPY</button>
+              </div>
+              <div class="codepane" data-cpane-body="stdio"><pre><span class="c">// Paste into any MCP host — Claude Code,</span>
+<span class="c">// Codex, Gemini CLI, OpenCode, Droid…</span>
+{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"soloman-manager"</span>: {
+      <span class="s">"command"</span>: <span class="s">"soloman-manager"</span>,
+      <span class="s">"args"</span>: [<span class="s">"mcp"</span>, <span class="s">"serve"</span>]
+    }
+  }
+}</pre></div>
+              <div class="codepane" data-cpane-body="http" hidden><pre><span class="c">// Or route through the local proxy,</span>
+<span class="c">// authenticated with your manager key.</span>
+{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"soloman-manager"</span>: {
+      <span class="s">"url"</span>: <span class="s">"http://127.0.0.1:8787/mcp"</span>,
+      <span class="s">"headers"</span>: {
+        <span class="s">"Authorization"</span>: <span class="s">"Bearer sm-key-…"</span>
+      }
+    }
+  }
+}</pre></div>
+              <div class="codewin-note">5 TOOLS · STDIO + HTTP · LOOPBACK ONLY</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ explorer ============ -->
+    <section class="section wrap" id="explore">
+      <div class="shead rv">
+        <div><div class="eyebrow">03 / EVERY PAGE</div><h2>Nine surfaces.<br>One engine.</h2></div>
+        <p>The whole app, page by page — real screenshots, not mockups. Pick a surface to inspect it.</p>
+      </div>
+      <div class="explorer rv">
+        <div class="rail" role="tablist" aria-label="App pages">
+          <button class="rtab" role="tab" aria-selected="true" data-xpane="overview"><span class="n">01</span>Overview</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="models"><span class="n">02</span>AI Models</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="proxy"><span class="n">03</span>Local Proxy</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="sync"><span class="n">04</span>CLI Sync</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="servers"><span class="n">05</span>MCP Servers</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="manager"><span class="n">06</span>Manager MCP</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="catalog"><span class="n">07</span>Catalog</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="builder"><span class="n">08</span>Builder</button>
+          <button class="rtab" role="tab" aria-selected="false" data-xpane="settings"><span class="n">09</span>Settings</button>
+        </div>
+        <div class="xframe">
+          <div class="chrome">
+            <span class="traffic"><i></i><i></i><i></i></span>
+            <span class="title"><img src="{{LOGO}}" alt=""><span data-xtitle>Overview</span></span>
+            <span class="addr" data-xaddr>#/</span>
+          </div>
+          <div class="xpane" data-xpane-body="overview">
+            <img src="{{SHOT_OVERVIEW}}" alt="Overview page" width="1600" height="1000">
+            <div class="xcap"><b>Overview.</b> The whole stack at a glance — running servers, proxy health, request activity and sync state.</div>
+          </div>
+          <div class="xpane" data-xpane-body="models" hidden>
+            <img src="{{SHOT_MODELS}}" alt="AI Models page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>AI Models.</b> Provider cards with connection status, keys and per-provider model lists — all stored locally.</div>
+          </div>
+          <div class="xpane" data-xpane-body="proxy" hidden>
+            <img src="{{SHOT_PROXY}}" alt="Local Proxy page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>Local Proxy.</b> The OpenAI-compatible endpoint on :8787 — local key, active route, fallback chain and request log.</div>
+          </div>
+          <div class="xpane" data-xpane-body="sync" hidden>
+            <img src="{{SHOT_SYNC}}" alt="CLI Sync page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>CLI Sync.</b> Detected coding CLIs with their native config paths — preview the diff, then write in one click.</div>
+          </div>
+          <div class="xpane" data-xpane-body="servers" hidden>
+            <img src="{{SHOT_SERVERS}}" alt="MCP Servers page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>MCP Servers.</b> Every install with state, transport, uptime and logs — plus its connect config, ready to paste.</div>
+          </div>
+          <div class="xpane" data-xpane-body="manager" hidden>
+            <img src="{{SHOT_MANAGER}}" alt="Manager MCP page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>Manager MCP.</b> The manager's own MCP surface — endpoint, agent config and the five tools exposed to agents.</div>
+          </div>
+          <div class="xpane" data-xpane-body="catalog" hidden>
+            <img src="{{SHOT_CATALOG}}" alt="Server Catalog page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>Catalog.</b> Eight ready blueprints — SMTP mail, GitHub, Slack, Notion, LinkedIn, scraper, files, Discord.</div>
+          </div>
+          <div class="xpane" data-xpane-body="builder" hidden>
+            <img src="{{SHOT_BUILDER}}" alt="Server Builder page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>Builder.</b> Scaffold a custom MCP server — tools, schemas, transports — without leaving the app.</div>
+          </div>
+          <div class="xpane" data-xpane-body="settings" hidden>
+            <img src="{{SHOT_SETTINGS}}" alt="Settings page" loading="lazy" width="1600" height="1000">
+            <div class="xcap"><b>Settings.</b> Data directory, transports and defaults — everything pointed at your machine, nothing at ours.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ architecture ============ -->
+    <section class="section wrap" id="local">
+      <div class="shead rv">
+        <div><div class="eyebrow">04 / PRIVATE BY DESIGN</div><h2>Your stack never leaves.<br>The agent comes to you.</h2></div>
+        <p>The model reasons; your machine executes. Credentials, environments and data stay in your OS-native data directory — the agent only ever sees tools.</p>
+      </div>
+      <div class="flow rv">
+        <div class="fnode">
+          <div class="eyebrow">01 / YOUR AGENT</div>
+          <h3>Any MCP host</h3>
+          <p>Claude Code, Codex, Gemini CLI, OpenCode, Droid. It reasons and calls tools — it never touches your credentials directly.</p>
+          <span class="tag">STDIO · HTTP ON LOOPBACK</span>
+        </div>
+        <div class="fjoin"><span class="ln"></span><small>JSON-RPC</small></div>
+        <div class="fnode">
+          <div class="eyebrow">02 / THE MANAGER</div>
+          <h3>Control center</h3>
+          <p>An Electron shell over a Python sidecar, bridged by newline-delimited JSON. Every request validated, every action logged.</p>
+          <span class="tag">SQLITE REGISTRY · 127.0.0.1</span>
+        </div>
+        <div class="fjoin"><span class="ln"></span><small>SUPERVISES</small></div>
+        <div class="fnode">
+          <div class="eyebrow">03 / THE SERVERS</div>
+          <h3>Isolated workers</h3>
+          <p>Each MCP server runs in its own venv with its own config, data and logs. Started, supervised and stopped entirely locally.</p>
+          <span class="tag">servers/&lt;id&gt;/ · OWN VENV</span>
+        </div>
+      </div>
+      <div class="truths rv">
+        <div class="truth"><b>0</b><small>TELEMETRY · ACCOUNTS</small></div>
+        <div class="truth"><b>100%</b><small>STATE ON YOUR MACHINE</small></div>
+        <div class="truth"><b>Offline</b><small>FULLY CAPABLE</small></div>
+        <div class="truth"><b>Apache-2.0</b><small>OPEN SOURCE</small></div>
+      </div>
+    </section>
+
+    <!-- ============ download ============ -->
+    <section class="section wrap" id="download">
+      <div class="shead rv">
+        <div><div class="eyebrow">05 / GET IT</div><h2>Run the stack.<br>Bring your agent.</h2></div>
+        <p>One installer per platform, Python backend bundled inside. No runtime prerequisites, no setup wizard, no sign-up.</p>
+      </div>
+      <div class="dlgrid">
+        <article class="os rv">
+          <div class="eyebrow">WINDOWS · X64</div>
+          <h3>Soloman Manager for Windows</h3>
+          <p>Squirrel installer — per-user install, branded setup, auto-launch. The Python sidecar ships as a single bundled executable.</p>
+          <div class="specs"><span>v0.1.0</span><span>~153 MB</span><span>WINDOWS 10+</span><span>SETUP.EXE</span></div>
+          <a class="btn solid" href="https://github.com/kaleemibnanwar/OctopusMCP-Manager/releases/download/windows-latest/Soloman.Manager-0.1.0.Setup.exe">Download installer ↓</a>
+          <div class="fine">Unsigned build — Windows SmartScreen will ask once on first run. Code signing is on the roadmap.</div>
+        </article>
+        <article class="os rv">
+          <div class="eyebrow">LINUX · AMD64</div>
+          <h3>Soloman Manager for Linux</h3>
+          <p>Native .deb package — installs to /usr/bin with a desktop entry and icon. Tested on Ubuntu; RPM and ZIP makers are in the pipeline.</p>
+          <div class="specs"><span>v0.1.0</span><span>~114 MB</span><span>DEBIAN / UBUNTU</span><span>.DEB</span></div>
+          <a class="btn solid" href="https://github.com/kaleemibnanwar/OctopusMCP-Manager/releases/download/windows-latest/soloman-manager_0.1.0_amd64.deb">Download .deb ↓</a>
+          <div class="fine">Install with your package manager — dependencies and desktop integration are handled for you.</div>
+        </article>
+      </div>
+      <div class="srcnote rv">
+        <span class="lbl">OR BUILD FROM SOURCE</span>
+        <code>git clone … &amp;&amp; npm ci &amp;&amp; npm run make</code>
+        <a href="https://github.com/kaleemibnanwar/OctopusMCP-Manager" target="_blank" rel="noreferrer">Read the source on GitHub ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <div>© <span data-year></span> Soloman Manager. Built for independent computing.</div>
+    <div class="flinks">
+      <a href="#features">Control center</a><a href="#agent">Manager MCP</a><a href="#explore">Every page</a><a href="#local">Local-first</a><a href="#download">Download</a><a href="https://github.com/kaleemibnanwar/OctopusMCP-Manager" target="_blank" rel="noreferrer">GitHub ↗</a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+
+      /* theme */
+      var KEY = "soloman-manager-theme";
+      var order = ["system", "light", "dark"];
+      var labels = { system: "◐", light: "☀", dark: "☾" };
+      var saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      if (order.indexOf(saved) !== -1) root.setAttribute("data-theme", saved);
+      function paint() {
+        var t = root.getAttribute("data-theme") || "system";
+        var el = document.querySelector("[data-theme-label]");
+        if (el) el.textContent = labels[t];
+        var dark = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", dark ? "#0a0c10" : "#f7f7f5");
+      }
+      var toggle = document.querySelector("[data-theme-toggle]");
+      if (toggle) toggle.addEventListener("click", function () {
+        var t = root.getAttribute("data-theme") || "system";
+        var next = order[(order.indexOf(t) + 1) % order.length];
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem(KEY, next); } catch (e) {}
+        paint();
+      });
+      paint();
+
+      /* mobile nav */
+      var menu = document.querySelector("[data-menu]");
+      var mnav = document.querySelector("[data-mnav]");
+      if (menu && mnav) {
+        menu.addEventListener("click", function () {
+          var open = mnav.classList.toggle("open");
+          menu.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        mnav.addEventListener("click", function (e) {
+          if (e.target.tagName === "A") { mnav.classList.remove("open"); menu.setAttribute("aria-expanded", "false"); }
+        });
+      }
+
+      /* generic tab wiring */
+      function wireTabs(tabAttr, bodyAttr, onSwitch) {
+        var tabs = Array.prototype.slice.call(document.querySelectorAll("[" + tabAttr + "]"));
+        tabs.forEach(function (tab) {
+          tab.addEventListener("click", function () {
+            var id = tab.getAttribute(tabAttr);
+            tabs.forEach(function (t) { t.setAttribute("aria-selected", t === tab ? "true" : "false"); });
+            document.querySelectorAll("[" + bodyAttr + "]").forEach(function (p) {
+              p.hidden = p.getAttribute(bodyAttr) !== id;
+            });
+            if (onSwitch) onSwitch(id, tab);
+          });
+        });
+      }
+
+      /* code window tabs + copy */
+      wireTabs("data-cpane", "data-cpane-body");
+      var copy = document.querySelector("[data-copy]");
+      if (copy) copy.addEventListener("click", function () {
+        var pane = document.querySelector(".codepane:not([hidden]) pre");
+        if (!pane) return;
+        var text = pane.textContent;
+        function done() { copy.textContent = "COPIED ✓"; setTimeout(function () { copy.textContent = "COPY"; }, 1600); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, done);
+        } else { done(); }
+      });
+
+      /* explorer tabs */
+      var routes = { overview: "#/", models: "#/models", proxy: "#/proxy", sync: "#/sync", servers: "#/servers", manager: "#/manager-mcp", catalog: "#/catalog", builder: "#/builder", settings: "#/settings" };
+      wireTabs("data-xpane", "data-xpane-body", function (id, tab) {
+        var title = document.querySelector("[data-xtitle]");
+        var addr = document.querySelector("[data-xaddr]");
+        if (title) title.textContent = tab.textContent.replace(/^\d+/, "").trim();
+        if (addr) addr.textContent = routes[id] || "#/";
+        var img = document.querySelector('[data-xpane-body="' + id + '"] img');
+        if (img) img.loading = "eager";
+      });
+
+      /* scroll reveal */
+      var rvs = document.querySelectorAll(".rv");
+      if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+          });
+        }, { threshold: 0.08 });
+        rvs.forEach(function (el) { io.observe(el); });
+      } else {
+        rvs.forEach(function (el) { el.classList.add("in"); });
+      }
+
+      /* year */
+      var year = document.querySelector("[data-year]");
+      if (year) year.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>
