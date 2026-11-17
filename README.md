@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🐙 OctopusMCP Manager
+<img src="public/assets/logo.png" alt="Soloman Manager" width="120" />
+
+# Soloman Manager
 
 ### **The Control Center & Package Manager for Model Context Protocol (MCP) Servers**
 
@@ -13,16 +15,16 @@
 
 <p align="center">
   <a href="#-quick-start">Quick Start</a> •
-  <a href="#-why-octopusmcp">Why OctopusMCP?</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-client-integrations">Client Configs</a> •
-  <a href="#-cli-reference">CLI Reference</a> •
-  <a href="#-meta-mcp-server">Meta-MCP</a> •
-  <a href="#-architecture">Architecture</a>
+  <a href="#-what-is-soloman-manager">Why Soloman Manager?</a> •
+  <a href="#-superpowers--key-features">Features</a> •
+  <a href="#-client-connection-recipes">Client Configs</a> •
+  <a href="#-cli-reference-cheatsheet">CLI Reference</a> •
+  <a href="#-meta-mcp-server-let-ai-manage-its-tools">Meta-MCP</a> •
+  <a href="#-architecture--security-model">Architecture</a>
 </p>
 
 ```
-  🐙 OctopusMCP Dashboard (Fluent UI) ─┐
+  🐙 Soloman Manager Dashboard (Fluent UI) ─┐
   💻 Terminal CLI (`octopusmcp`)      ──┼──▶ 🔒 JSON-RPC Bridge ──▶ 🐍 Isolated Python Venvs
   🤖 Meta-MCP Server (`mcp.run`)      ─┘                               (Stdio & HTTP Supervised)
 ```
@@ -31,15 +33,17 @@
 
 ---
 
-## 💡 What is OctopusMCP?
+## 💡 What is Soloman Manager?
 
-**OctopusMCP** is the unified runtime manager, package installer, and lifecycle controller for [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) tools.
+**Soloman Manager** is the unified runtime manager, package installer, and lifecycle controller for [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) tools.
+
+> The CLI command and Python package are named **`octopusmcp`** — that's the engine under the hood; Soloman Manager is the product.
 
 Think of it as **"Docker Desktop + Homebrew for MCP Servers"**:
 - 🛡️ **Zero Dependency Hell**: Every MCP server runs in its own isolated Python virtual environment with sandboxed storage, models, logs, and configs.
 - ⚡ **Instant Client Configs**: 1-click JSON snippet generator for **Claude Desktop, Cursor, Claude Code, Zed, Windsurf, LibreChat, and Cline**.
 - 🚀 **Dual Transport (Stdio + Supervised HTTP/SSE)**: Run servers with native high-speed stdio or spin up background HTTP microservices with automated port checking.
-- 🖥️ **Desktop App + CLI + Meta-MCP**: Use the modern Fluent UI dashboard, power-user terminal CLI, or let your AI agent manage its own MCP toolset via the built-in OctopusMCP Meta-Server!
+- 🖥️ **Desktop App + CLI + Meta-MCP**: Use the modern Fluent UI dashboard, power-user terminal CLI, or let your AI agent manage its own MCP toolset via the built-in Soloman Manager Meta-Server!
 
 ---
 
@@ -53,8 +57,8 @@ Think of it as **"Docker Desktop + Homebrew for MCP Servers"**:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/octopusmcp-manager.git
-cd "octopusmcp manager"
+git clone https://github.com/kaleemibnanwar/Soloman-Manager.git
+cd Soloman-Manager
 
 # Setup Python backend virtual environment
 python3 -m venv .venv
@@ -117,7 +121,7 @@ Every installed MCP server gets a dedicated directory structure under your OS ap
 ```
 
 ### 🔌 3. Universal Client Integration Generator
-Never handcraft brittle JSON configuration files again. OctopusMCP exports validated schemas for:
+Never handcraft brittle JSON configuration files again. Soloman Manager exports validated schemas for:
 - 🟣 **Claude Desktop** (`claude_desktop_config.json`)
 - ⚡ **Cursor IDE** (`Settings > MCP`)
 - 🤖 **Claude Code CLI** (`claude mcp add`)
@@ -132,15 +136,15 @@ Need to build a brand-new MCP server?
 ```bash
 octopusmcp generate my-custom-tool --description "Supercharged DB query MCP tool"
 ```
-OctopusMCP creates a production-ready FastMCP project skeleton with dependencies, entrypoints, and packaging ready to test immediately.
+Soloman Manager creates a production-ready FastMCP project skeleton with dependencies, entrypoints, and packaging ready to test immediately.
 
 ---
 
 ## 🤖 Meta-MCP Server: Let AI Manage its Tools
 
-OctopusMCP exposes its own **MCP Server** via `octopusmcp mcp`. Plug it into Claude or Cursor, and your AI assistant can dynamically discover, install, and start MCP servers on demand!
+Soloman Manager exposes its own **MCP Server** via `octopusmcp mcp`. Plug it into Claude or Cursor, and your AI assistant can dynamically discover, install, and start MCP servers on demand!
 
-### Add OctopusMCP to Claude Desktop:
+### Add Soloman Manager to Claude Desktop:
 
 Add this to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
@@ -183,7 +187,7 @@ Commands:
   remove     Uninstall a package (--purge-data to remove local weights/data)
   generate   Scaffold a new FastMCP server project
   http       Manage persistent HTTP background services (start / stop)
-  mcp        Run the OctopusMCP Meta-Server over stdio
+  mcp        Run the Soloman Manager Meta-Server over stdio
 ```
 
 ---
@@ -225,7 +229,7 @@ Navigate to **Cursor Settings → MCP → Add New MCP Server**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      OctopusMCP Desktop Frontend                        │
+│                    Soloman Manager Desktop Frontend                     │
 │             (Frameless Fluent UI, Command Palette, Dark/Light)          │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │ ContextBridge (IPC JSON-Lines)
@@ -274,7 +278,7 @@ npm run make
 
 ## 🧪 Testing Suite
 
-OctopusMCP is tested across Python backend and Electron frontend layers:
+Soloman Manager is tested across Python backend and Electron frontend layers:
 
 ```bash
 # Run Python backend unit and integration tests
@@ -294,6 +298,15 @@ We love community contributions! To add a new server to the official catalog:
 3. Submit a Pull Request!
 
 ---
+
+## 🌐 The Soloman ecosystem
+
+| Project | What it is |
+| --- | --- |
+| 🧠 [**Soloman Studio**](https://github.com/kaleemibnanwar/Soloman-Studio) | Local-first, open-source AI workspace — research, docs, data, media, automation, MCP, development |
+| ✂️ [**Soloman Editor**](https://github.com/kaleemibnanwar/SolomanEditor) | The video editor that drives itself — AI-powered editing with MCP control |
+| 🐙 **Soloman Manager** | This repo — control center & package manager for MCP servers |
+| 🌐 [**Soloman Limb**](https://github.com/kaleemibnanwar/solomanlimb) | MCP for any browser — let any agent drive your real Chrome |
 
 ## 📄 License
 
